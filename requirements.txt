@@ -30,7 +30,7 @@ itsdangerous==2.2.0
 Jinja2==3.1.6
 kiwisolver==1.4.7
 lxml==5.4.0
-Markdown==3.8
+Markdown==3.7
 MarkupSafe==3.0.2
 matplotlib==3.10.3
 narwhals==1.40.0
