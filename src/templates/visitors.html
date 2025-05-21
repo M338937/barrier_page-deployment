@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Visitors</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --matrix-green: #00ff41;
+            --matrix-dark-green: #003b00;
+            --matrix-black: #0d0208;
+            --matrix-light-green: #39ff14;
+            --matrix-blue: #0077ff;
+            --matrix-red: #ff0033;
+            --matrix-yellow: #ffcc00;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Share Tech Mono', monospace;
+        }
+        
+        body {
+            background-color: var(--matrix-black);
+            color: var(--matrix-green);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.15;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--matrix-green);
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px var(--matrix-green);
+        }
+        
+        .header .actions {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .btn {
+            background-color: var(--matrix-dark-green);
+            color: var(--matrix-green);
+            border: 1px solid var(--matrix-green);
+            padding: 8px 15px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn:hover {
+            background-color: var(--matrix-green);
+            color: var(--matrix-black);
+            box-shadow: 0 0 15px var(--matrix-green);
+        }
+        
+        .visitors-table-container {
+            background-color: rgba(0, 0, 0, 0.7);
+            border: 1px solid var(--matrix-green);
+            border-radius: 5px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
+            margin-bottom: 30px;
+            overflow-x: auto;
+        }
+        
+        .visitors-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .visitors-table th,
+        .visitors-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(0, 255, 65, 0.3);
+        }
+        
+        .visitors-table th {
+            background-color: rgba(0, 255, 65, 0.1);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 14px;
+        }
+        
+        .visitors-table tr:hover {
+            background-color: rgba(0, 255, 65, 0.05);
+        }
+        
+        .visitors-table a {
+            color: var(--matrix-green);
+            text-decoration: none;
+        }
+        
+        .visitors-table a:hover {
+            text-decoration: underline;
+            text-shadow: 0 0 5px var(--matrix-green);
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px 0;
+            border-top: 1px solid var(--matrix-green);
+            margin-top: 30px;
+            font-size: 14px;
+        }
+        
+        .terminal-line {
+            position: relative;
+            padding-left: 20px;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        
+        .terminal-line::before {
+            content: ">";
+            position: absolute;
+            left: 0;
+            color: var(--matrix-green);
+        }
+        
+        .flash-message {
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 3px;
+            text-align: center;
+        }
+        
+        .flash-message.danger {
+            background-color: rgba(255, 0, 0, 0.2);
+            border: 1px solid #ff0000;
+            color: #ff0000;
+        }
+        
+        .flash-message.warning {
+            background-color: rgba(255, 255, 0, 0.2);
+            border: 1px solid #ffff00;
+            color: #ffff00;
+        }
+        
+        .flash-message.success {
+            background-color: rgba(0, 255, 0, 0.2);
+            border: 1px solid #00ff00;
+            color: #00ff00;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            gap: 10px;
+        }
+        
+        .pagination a {
+            color: var(--matrix-green);
+            text-decoration: none;
+            padding: 8px 12px;
+            border: 1px solid var(--matrix-green);
+            transition: all 0.3s ease;
+        }
+        
+        .pagination a:hover,
+        .pagination a.active {
+            background-color: var(--matrix-green);
+            color: var(--matrix-black);
+        }
+        
+        .search-container {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .search-container input {
+            flex: 1;
+            padding: 10px;
+            background-color: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--matrix-green);
+            color: var(--matrix-green);
+            font-size: 14px;
+        }
+        
+        .search-container input:focus {
+            outline: none;
+            box-shadow: 0 0 10px var(--matrix-green);
+        }
+        
+        .export-options {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrix"></canvas>
+    
+    <div class="container">
+        <div class="header">
+            <h1>All Visitors</h1>
+            <div class="actions">
+                <a href="{{ url_for('admin.dashboard') }}" class="btn">Dashboard</a>
+                <a href="{{ url_for('admin.logout') }}" class="btn">Logout</a>
+            </div>
+        </div>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <div class="export-options">
+            <h3>Export Data:</h3>
+            <a href="{{ url_for('admin.export_data', format='csv') }}" class="btn">CSV</a>
+            <a href="{{ url_for('admin.export_data', format='excel') }}" class="btn">Excel</a>
+            <a href="{{ url_for('admin.export_data', format='json') }}" class="btn">JSON</a>
+        </div>
+        
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Search visitors...">
+            <button class="btn" onclick="searchTable()">Search</button>
+        </div>
+        
+        <div class="visitors-table-container">
+            <table class="visitors-table" id="visitorsTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>IP Address</th>
+                        <th>Browser</th>
+                        <th>OS</th>
+                        <th>Device</th>
+                        <th>Country</th>
+                        <th>City</th>
+                        <th>Visit Time</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for visitor in visitors %}
+                    <tr>
+                        <td>{{ visitor.id }}</td>
+                        <td>{{ visitor.ip_address }}</td>
+                        <td>{{ visitor.browser or 'Unknown' }}</td>
+                        <td>{{ visitor.os or 'Unknown' }}</td>
+                        <td>{{ visitor.device_type or 'Unknown' }}</td>
+                        <td>{{ visitor.country or 'Unknown' }}</td>
+                        <td>{{ visitor.city or 'Unknown' }}</td>
+                        <td>{{ visitor.visit_time.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                        <td><a href="{{ url_for('admin.visitor_detail', visitor_id=visitor.id) }}">View Details</a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="pagination" id="pagination">
+            <!-- Pagination will be generated by JavaScript -->
+        </div>
+        
+        <div class="terminal-output">
+            <div class="terminal-line">Visitor database loaded</div>
+            <div class="terminal-line">Total records: {{ visitors|length }}</div>
+            <div class="terminal-line">Displaying all visitor records</div>
+            <div class="terminal-line">Awaiting further commands...</div>
+        </div>
+        
+        <div class="footer">
+            <p>Visitor Tracking System &copy; {{ now.year }}</p>
+        </div>
+    </div>
+    
+    <script>
+        // Matrix rain effect
+        const canvas = document.getElementById('matrix');
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        const matrixChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$+-*/=%\"'#&_(),.;:?!\\|{}<>[]^~";
+        const fontSize = 14;
+        const columns = canvas.width / fontSize;
+        
+        const drops = [];
+        for (let i = 0; i < columns; i++) {
+            drops[i] = Math.floor(Math.random() * canvas.height);
+        }
+        
+        function draw() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.fillStyle = '#00ff41';
+            ctx.font = `${fontSize}px monospace`;
+            
+            for (let i = 0; i < drops.length; i++) {
+                const text = matrixChars.charAt(Math.floor(Math.random() * matrixChars.length));
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                
+                drops[i]++;
+            }
+        }
+        
+        setInterval(draw, 33);
+        
+        // Resize canvas when window is resized
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+        
+        // Table pagination
+        const table = document.getElementById('visitorsTable');
+        const rowsPerPage = 10;
+        let currentPage = 1;
+        
+        function showPage(page) {
+            const rows = table.querySelectorAll('tbody tr');
+            const start = (page - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+            
+            rows.forEach((row, index) => {
+                row.style.display = (index >= start && index < end) ? '' : 'none';
+            });
+            
+            updatePagination();
+        }
+        
+        function updatePagination() {
+            const rows = table.querySelectorAll('tbody tr');
+            const totalPages = Math.ceil(rows.length / rowsPerPage);
+            const pagination = document.getElementById('pagination');
+            
+            pagination.innerHTML = '';
+            
+            // Previous button
+            if (currentPage > 1) {
+                const prev = document.createElement('a');
+                prev.href = '#';
+                prev.textContent = 'Previous';
+                prev.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    currentPage--;
+                    showPage(currentPage);
+                });
+                pagination.appendChild(prev);
+            }
+            
+            // Page numbers
+            for (let i = 1; i <= totalPages; i++) {
+                const pageLink = document.createElement('a');
+                pageLink.href = '#';
+                pageLink.textContent = i;
+                if (i === currentPage) {
+                    pageLink.classList.add('active');
+                }
+                pageLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    currentPage = i;
+                    showPage(currentPage);
+                });
+                pagination.appendChild(pageLink);
+            }
+            
+            // Next button
+            if (currentPage < totalPages) {
+                const next = document.createElement('a');
+                next.href = '#';
+                next.textContent = 'Next';
+                next.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    currentPage++;
+                    showPage(currentPage);
+                });
+                pagination.appendChild(next);
+            }
+        }
+        
+        // Search function
+        function searchTable() {
+            const input = document.getElementById('searchInput');
+            const filter = input.value.toUpperCase();
+            const rows = table.querySelectorAll('tbody tr');
+            
+            rows.forEach(row => {
+                let found = false;
+                const cells = row.querySelectorAll('td');
+                
+                cells.forEach(cell => {
+                    if (cell.textContent.toUpperCase().indexOf(filter) > -1) {
+                        found = true;
+                    }
+                });
+                
+                row.style.display = found ? '' : 'none';
+            });
+            
+            // Reset pagination when searching
+            currentPage = 1;
+            updatePagination();
+        }
+        
+        // Initialize pagination
+        showPage(currentPage);
+        
+        // Add event listener for search input
+        document.getElementById('searchInput').addEventListener('keyup', searchTable);
+    </script>
+</body>
+</html>

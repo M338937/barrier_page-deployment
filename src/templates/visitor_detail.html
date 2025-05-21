@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visitor Details</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --matrix-green: #00ff41;
+            --matrix-dark-green: #003b00;
+            --matrix-black: #0d0208;
+            --matrix-light-green: #39ff14;
+            --matrix-blue: #0077ff;
+            --matrix-red: #ff0033;
+            --matrix-yellow: #ffcc00;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Share Tech Mono', monospace;
+        }
+        
+        body {
+            background-color: var(--matrix-black);
+            color: var(--matrix-green);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.15;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--matrix-green);
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px var(--matrix-green);
+        }
+        
+        .header .actions {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .btn {
+            background-color: var(--matrix-dark-green);
+            color: var(--matrix-green);
+            border: 1px solid var(--matrix-green);
+            padding: 8px 15px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn:hover {
+            background-color: var(--matrix-green);
+            color: var(--matrix-black);
+            box-shadow: 0 0 15px var(--matrix-green);
+        }
+        
+        .visitor-details {
+            background-color: rgba(0, 0, 0, 0.7);
+            border: 1px solid var(--matrix-green);
+            border-radius: 5px;
+            padding: 30px;
+            box-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
+            margin-bottom: 30px;
+        }
+        
+        .visitor-details h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-align: center;
+            text-shadow: 0 0 10px var(--matrix-green);
+        }
+        
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .detail-group {
+            margin-bottom: 15px;
+        }
+        
+        .detail-group h3 {
+            font-size: 16px;
+            margin-bottom: 5px;
+            color: var(--matrix-light-green);
+            text-transform: uppercase;
+        }
+        
+        .detail-group p {
+            font-size: 14px;
+            word-break: break-word;
+        }
+        
+        .detail-section {
+            margin-bottom: 30px;
+        }
+        
+        .detail-section h3 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid var(--matrix-green);
+            padding-bottom: 5px;
+        }
+        
+        .map-container {
+            height: 400px;
+            margin-bottom: 30px;
+            border: 1px solid var(--matrix-green);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px 0;
+            border-top: 1px solid var(--matrix-green);
+            margin-top: 30px;
+            font-size: 14px;
+        }
+        
+        .terminal-line {
+            position: relative;
+            padding-left: 20px;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        
+        .terminal-line::before {
+            content: ">";
+            position: absolute;
+            left: 0;
+            color: var(--matrix-green);
+        }
+        
+        .list-container {
+            background-color: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--matrix-green);
+            border-radius: 3px;
+            padding: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .list-container ul {
+            list-style-type: none;
+        }
+        
+        .list-container li {
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        
+        .list-container li::before {
+            content: "•";
+            color: var(--matrix-green);
+            display: inline-block;
+            width: 1em;
+            margin-left: -1em;
+        }
+        
+        .flash-message {
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 3px;
+            text-align: center;
+        }
+        
+        .flash-message.danger {
+            background-color: rgba(255, 0, 0, 0.2);
+            border: 1px solid #ff0000;
+            color: #ff0000;
+        }
+        
+        .flash-message.warning {
+            background-color: rgba(255, 255, 0, 0.2);
+            border: 1px solid #ffff00;
+            color: #ffff00;
+        }
+        
+        .flash-message.success {
+            background-color: rgba(0, 255, 0, 0.2);
+            border: 1px solid #00ff00;
+            color: #00ff00;
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrix"></canvas>
+    
+    <div class="container">
+        <div class="header">
+            <h1>Visitor Profile</h1>
+            <div class="actions">
+                <a href="{{ url_for('admin.dashboard') }}" class="btn">Dashboard</a>
+                <a href="{{ url_for('admin.visitors') }}" class="btn">All Visitors</a>
+                <a href="{{ url_for('admin.logout') }}" class="btn">Logout</a>
+            </div>
+        </div>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <div class="visitor-details">
+            <h2>Visitor #{{ visitor.id }}</h2>
+            
+            <div class="detail-section">
+                <h3>Basic Information</h3>
+                <div class="detail-grid">
+                    <div class="detail-group">
+                        <h3>IP Address</h3>
+                        <p>{{ visitor.ip_address or 'Unknown' }}</p>
+                    </div>
+                    <div class="detail-group">
+                        <h3>Visit Time</h3>
+                        <p>{{ visitor.visit_time.strftime('%Y-%m-%d %H:%M:%S') if visitor.visit_time else 'Unknown' }}</p>
+                    </div>
+                    <div class="detail-group">
+                        <h3>Referrer</h3>
+                        <p>{{ visitor.referrer or 'Direct/Unknown' }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="detail-section">
+                <h3>Device Information</h3>
+                <div class="detail-grid">
+                    <div class="detail-group">
+                        <h3>Browser</h3>
+                        <p>{{ visitor.browser or 'Unknown' }} {{ visitor.browser_version or '' }}</p>
+                    </div>
+                    <div class="detail-group">
+                        <h3>Operating System</h3>
+                        <p>{{ visitor.os or 'Unknown' }} {{ visitor.os_version or '' }}</p>
+                    </div>
+                    <div class="detail-group">
+                        <h3>Device Type</h3>
+                        <p>{{ visitor.device_type or 'Unknown' }}</p>
+                    </div>
+                    <div class="detail-group">
+                        <h3>Platform</h3>
+                        <p>{{ visitor.platform or 'Unknown' }}</p>
+                    </div>
+                    <div class="detail-group">
+                        <h3>Screen Resolution</h3>
+                        <p>{{ visitor.screen_resolution or 'Unknown' }}</p>
+                    </div>
+                    <div class="detail-group">
+                        <h3>Viewport Size</h3>
+                        <p>{{ visitor.viewport_size or 'Unknown' }}</p>
+                    </div>
+                    <div class="detail-group">
+                        <h3>Color Depth</h3>
+                        <p>{{ visitor.color_depth or 'Unknown' }}</p>
+                    </div>
+                    <div class="detail-group">
+                        <h3>Touch Support</h3>
+                        <p>{{ 'Yes' if visitor.touch_support else 'No' if visitor.touch_support is not none else 'Unknown' }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="detail-section">
+                <h3>Hardware Information</h3>
+                <div class="detail-grid">
+                    <div class="detail-group">
+                        <h3>Device Memory</h3>
+                        <p>{{ visitor.device_memory or 'Unknown' }} GB</p>
+                    </div>
+                    <div class="detail-group">
+                        <h3>Hardware Concurrency</h3>
+                        <p>{{ visitor.hardware_concurrency or 'Unknown' }} cores</p>
+                    </div>
+                    <div class="detail-group">
+                        <h3>Battery Level</h3>
+                        <p>{{ (visitor.battery_level * 100)|int if visitor.battery_level is not none else 'Unknown' }}%</p>
+                    </div>
+                    <div class="detail-group">
+                        <h3>Battery Charging</h3>
+                        <p>{{ 'Yes' if visitor.battery_charging else 'No' if visitor.battery_charging is not none else 'Unknown' }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="detail-section">
+                <h3>Location Information</h3>
+                <div class="detail-grid">
+                    <div class="detail-group">
+                        <h3>Country</h3>
+                        <p>{{ visitor.country or 'Unknown' }}</p>
+                    </div>
+                    <div class="detail-group">
+                        <h3>Region</h3>
+                        <p>{{ visitor.region or 'Unknown' }}</p>
+                    </div>
+                    <div class="detail-group">
+                        <h3>City</h3>
+                        <p>{{ visitor.city or 'Unknown' }}</p>
+                    </div>
+                    <div class="detail-group">
+                        <h3>ISP</h3>
+                        <p>{{ visitor.isp or 'Unknown' }}</p>
+                    </div>
+                    <div class="detail-group">
+                        <h3>Connection Type</h3>
+                        <p>{{ visitor.connection_type or 'Unknown' }}</p>
+                    </div>
+                    <div class="detail-group">
+                        <h3>Coordinates</h3>
+                        <p>{{ visitor.latitude or 'Unknown' }}, {{ visitor.longitude or 'Unknown' }}</p>
+                    </div>
+                </div>
+                
+                {% if visitor.latitude and visitor.longitude %}
+                <div class="map-container" id="map"></div>
+                {% endif %}
+            </div>
+            
+            <div class="detail-section">
+                <h3>Browser Capabilities</h3>
+                <div class="detail-grid">
+                    <div class="detail-group">
+                        <h3>Language</h3>
+                        <p>{{ visitor.language or 'Unknown' }}</p>
+                    </div>
+                    <div class="detail-group">
+                        <h3>Timezone</h3>
+                        <p>{{ visitor.timezone or 'Unknown' }}</p>
+                    </div>
+                    <div class="detail-group">
+                        <h3>Do Not Track</h3>
+                        <p>{{ visitor.do_not_track or 'Not Set' }}</p>
+                    </div>
+                    <div class="detail-group">
+                        <h3>Cookies Enabled</h3>
+                        <p>{{ 'Yes' if visitor.cookies_enabled else 'No' if visitor.cookies_enabled is not none else 'Unknown' }}</p>
+                    </div>
+                    <div class="detail-group">
+                        <h3>Local Storage</h3>
+                        <p>{{ 'Available' if visitor.local_storage_available else 'Not Available' if visitor.local_storage_available is not none else 'Unknown' }}</p>
+                    </div>
+                    <div class="detail-group">
+                        <h3>Session Storage</h3>
+                        <p>{{ 'Available' if visitor.session_storage_available else 'Not Available' if visitor.session_storage_available is not none else 'Unknown' }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="detail-section">
+                <h3>Browser Plugins</h3>
+                <div class="list-container">
+                    <ul>
+                        {% if plugins and plugins|length > 0 %}
+                            {% for plugin in plugins %}
+                                <li>{{ plugin }}</li>
+                            {% endfor %}
+                        {% else %}
+                            <li>No plugins detected</li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="detail-section">
+                <h3>Available Fonts</h3>
+                <div class="list-container">
+                    <ul>
+                        {% if fonts and fonts|length > 0 %}
+                            {% for font in fonts %}
+                                <li>{{ font }}</li>
+                            {% endfor %}
+                        {% else %}
+                            <li>No fonts detected</li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="detail-section">
+                <h3>Fingerprinting Information</h3>
+                <div class="detail-grid">
+                    <div class="detail-group">
+                        <h3>Canvas Fingerprint</h3>
+                        <p>{{ visitor.canvas_fingerprint or 'Not available' }}</p>
+                    </div>
+                    {% if visitor.webgl_fingerprint %}
+                    <div class="detail-group">
+                        <h3>WebGL Vendor</h3>
+                        <p>{{ visitor.webgl_fingerprint.vendor if visitor.webgl_fingerprint is mapping and visitor.webgl_fingerprint.vendor else 'Not available' }}</p>
+                    </div>
+                    <div class="detail-group">
+                        <h3>WebGL Renderer</h3>
+                        <p>{{ visitor.webgl_fingerprint.renderer if visitor.webgl_fingerprint is mapping and visitor.webgl_fingerprint.renderer else 'Not available' }}</p>
+                    </div>
+                    {% else %}
+                    <div class="detail-group">
+                        <h3>WebGL Fingerprint</h3>
+                        <p>Not available</p>
+                    </div>
+                    {% endif %}
+                    <div class="detail-group">
+                        <h3>Audio Fingerprint</h3>
+                        <p>{{ visitor.audio_fingerprint or 'Not available' }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="detail-section">
+                <h3>Raw User Agent</h3>
+                <div class="detail-group">
+                    <p style="word-break: break-all;">{{ visitor.user_agent or 'Not available' }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="terminal-output">
+            <div class="terminal-line">Visitor profile loaded</div>
+            <div class="terminal-line">Analyzing fingerprint data...</div>
+            <div class="terminal-line">Geolocation coordinates: {{ visitor.latitude or 'Unknown' }}, {{ visitor.longitude or 'Unknown' }}</div>
+            <div class="terminal-line">Device identification complete</div>
+            <div class="terminal-line">Awaiting further commands...</div>
+        </div>
+        
+        <div class="footer">
+            <p>Visitor Tracking System &copy; {{ now.year }}</p>
+        </div>
+    </div>
+    
+    <script>
+        // Matrix rain effect
+        const canvas = document.getElementById('matrix');
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        const matrixChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$+-*/=%\"'#&_(),.;:?!\\|{}<>[]^~";
+        const fontSize = 14;
+        const columns = canvas.width / fontSize;
+        
+        const drops = [];
+        for (let i = 0; i < columns; i++) {
+            drops[i] = Math.floor(Math.random() * canvas.height);
+        }
+        
+        function draw() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.fillStyle = '#00ff41';
+            ctx.font = `${fontSize}px monospace`;
+            
+            for (let i = 0; i < drops.length; i++) {
+                const text = matrixChars.charAt(Math.floor(Math.random() * matrixChars.length));
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                
+                drops[i]++;
+            }
+        }
+        
+        setInterval(draw, 33);
+        
+        // Resize canvas when window is resized
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+        
+        // Initialize map if coordinates are available
+        {% if visitor.latitude and visitor.longitude %}
+        function initMap() {
+            const mapOptions = {
+                center: { lat: {{ visitor.latitude }}, lng: {{ visitor.longitude }} },
+                zoom: 12,
+                styles: [
+                    { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
+                    { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
+                    { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
+                    {
+                        featureType: "administrative.locality",
+                        elementType: "labels.text.fill",
+                        stylers: [{ color: "#00ff41" }],
+                    },
+                    {
+                        featureType: "poi",
+                        elementType: "labels.text.fill",
+                        stylers: [{ color: "#00ff41" }],
+                    },
+                    {
+                        featureType: "poi.park",
+                        elementType: "geometry",
+                        stylers: [{ color: "#263c3f" }],
+                    },
+                    {
+                        featureType: "poi.park",
+                        elementType: "labels.text.fill",
+                        stylers: [{ color: "#6b9a76" }],
+                    },
+                    {
+                        featureType: "road",
+                        elementType: "geometry",
+                        stylers: [{ color: "#38414e" }],
+                    },
+                    {
+                        featureType: "road",
+                        elementType: "geometry.stroke",
+                        stylers: [{ color: "#212a37" }],
+                    },
+                    {
+                        featureType: "road",
+                        elementType: "labels.text.fill",
+                        stylers: [{ color: "#9ca5b3" }],
+                    },
+                    {
+                        featureType: "road.highway",
+                        elementType: "geometry",
+                        stylers: [{ color: "#746855" }],
+                    },
+                    {
+                        featureType: "road.highway",
+                        elementType: "geometry.stroke",
+                        stylers: [{ color: "#1f2835" }],
+                    },
+                    {
+                        featureType: "road.highway",
+                        elementType: "labels.text.fill",
+                        stylers: [{ color: "#f3d19c" }],
+                    },
+                    {
+                        featureType: "transit",
+                        elementType: "geometry",
+                        stylers: [{ color: "#2f3948" }],
+                    },
+                    {
+                        featureType: "transit.station",
+                        elementType: "labels.text.fill",
+                        stylers: [{ color: "#00ff41" }],
+                    },
+                    {
+                        featureType: "water",
+                        elementType: "geometry",
+                        stylers: [{ color: "#17263c" }],
+                    },
+                    {
+                        featureType: "water",
+                        elementType: "labels.text.fill",
+                        stylers: [{ color: "#515c6d" }],
+                    },
+                    {
+                        featureType: "water",
+                        elementType: "labels.text.stroke",
+                        stylers: [{ color: "#17263c" }],
+                    },
+                ]
+            };
+            
+            const map = new google.maps.Map(document.getElementById("map"), mapOptions);
+            
+            const marker = new google.maps.Marker({
+                position: { lat: {{ visitor.latitude }}, lng: {{ visitor.longitude }} },
+                map: map,
+                title: "Visitor Location"
+            });
+        }
+        
+        // Load Google Maps API
+        const script = document.createElement('script');
+        script.src = 'https://maps.googleapis.com/maps/api/js?callback=initMap';
+        script.async = true;
+        document.head.appendChild(script);
+        {% endif %}
+    </script>
+</body>
+</html>
