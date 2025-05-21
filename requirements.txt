@@ -11,7 +11,7 @@ chardet==5.2.0
 charset-normalizer==3.4.2
 click==8.1.8
 contourpy==1.1.1
-cryptography==45.0.2
+cryptography==36.0.2
 cssselect2==0.8.0
 cycler==0.12.1
 defusedxml==0.7.1
